@@ -1,0 +1,4 @@
+page{
+  /* 全局换颜色 */
+  background-color: #f3f3f3;
+}

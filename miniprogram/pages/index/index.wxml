@@ -1,0 +1,26 @@
+<!-- 轮播图 -->
+<view class="banner">
+  <swiper indicator-dots="true" autoplay="true" class="banner_body">
+    <swiper-item wx:for="{{banner}}" wx:key="index" class="banner-item">
+      <image src="{{item}}" mode="widthFix"/>
+    </swiper-item>
+  </swiper>
+</view>
+
+<!-- 公告 -->
+<view class="notice" bindtap="handleClickNotice">
+  <image src="../../images/notice.png" />
+  <text>关注公众号可享订单推送-接单员请务必添加客服v:livewithAsh</text>
+</view>
+
+<!-- 下方容器 -->
+<view class="container">
+  <view class="body" wx:for="{{indexConfig}}" wx:key="index" bindtap="toDetail" data-url="{{item.url}}">
+    <view class="circleBorder">
+      <view class="icon">
+      <image src="{{item.icon}}" />
+    </view>
+    </view>
+    <text class="text">{{item.text}}</text>
+  </view>
+</view>

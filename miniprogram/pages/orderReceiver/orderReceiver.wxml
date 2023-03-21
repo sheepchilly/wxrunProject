@@ -1,0 +1,12 @@
+<view class="body" wx:for="{{ receiveList }}" wx:key="index">
+  <view class="top">
+    <view class="name">{{ item.name }}</view>
+    <view class="userID">{{ item.userID }}</view>
+  </view>
+  <image src="{{ item.userIDImg }}" mode="aspectFit"></image>
+  <view class="btn">
+  <!-- 两个按钮公用同一个函数，通过data-name把通过和不通过的状态传递过去 -->
+    <button type="warn" size="mini" data-item="{{ item }}" data-name="不通过" bindtap="toExamine">不通过</button>
+    <button type="primary" size="mini" data-item="{{ item }}" data-name="通过" bindtap="toExamine">通过</button>
+  </view>
+</view>

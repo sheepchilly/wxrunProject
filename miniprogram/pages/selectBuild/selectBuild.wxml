@@ -1,0 +1,19 @@
+<!-- scroll-view:支持水平方向或者垂直方向的移动 -->
+<scroll-view scroll-x class="scroll-view">
+  <view class="tab">
+  <!-- 在class里加双大括号可以进行一些算术运算和比较简单的判断 -->
+    <view class="tab-item {{tabNow===index?'select':''}}" wx:for="{{tabList}}" wx:key="index" bindtap="selectTab" data-id="{{index}}">
+      {{item}}
+    </view>
+  </view>
+</scroll-view>
+
+<!-- 下方 -->
+<view wx:if="{{tabNow===0}}" class="body">
+    <view class="item" wx:for="{{16}}" wx:key="index" bindtap="selectBuild" data-index="{{index}}">
+      {{index+1}}号楼
+    </view>
+</view>
+<view class="showAll">
+  已显示全部
+</view>

@@ -1,0 +1,22 @@
+Component({
+  properties:{
+    title:{
+      type:String,
+      value:'提示'
+    },
+    content:{
+      type:String,
+      value:''
+    }
+  },
+  methods:{
+    //子组件的方法
+    cancel(){
+      //给父组件传递的事件名以及参数
+      this.triggerEvent('cancel')
+    },
+    confirm(){
+      this.triggerEvent('confirm','dy')
+    }
+  }
+})

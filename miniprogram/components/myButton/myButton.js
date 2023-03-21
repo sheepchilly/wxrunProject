@@ -1,0 +1,10 @@
+Component({
+  //properti相当于vue的prop
+  properties:{
+    //接收的参数
+    text:{
+      type:String,
+      value:'确认'
+    }
+  }
+})

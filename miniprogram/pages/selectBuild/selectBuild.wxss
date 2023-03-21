@@ -1,0 +1,42 @@
+.scroll-view{
+  background-color: #fff;
+  /* white-space:不换行 */
+  white-space: nowrap;
+}
+.tab{
+  display: flex;
+  text-align: center;
+}
+.tab .tab-item{
+  height: 90rpx;
+  line-height: 90rpx;
+  /* 变成行内块元素 */
+  display: inline-block;
+  margin: 0 10rpx;
+  padding: 0 20rpx;
+  /* 有四个item，加flex:1就等于tab的宽度平均分配 */
+  flex:1;
+}
+.select{
+  color: rgb(100, 144, 233);
+  border-bottom: 4rpx solid #1067D1;
+}
+/* 下方样式 */
+.body{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffff;
+  margin-top: 20rpx;
+}
+.body .item{
+  width: 90%;
+  padding: 30rpx 0;
+  border-bottom: 2rpx solid #d1d1d1;
+}
+.showAll{
+  color: #a1a1a1;
+  margin: 20rpx 0;
+  text-align: center;
+}
