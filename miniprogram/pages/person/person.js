@@ -17,7 +17,30 @@ Page({
     */
 
     personReceiveState:'',
-    admin:false
+    admin:false,
+    code:'',
+  },
+  testUser(){
+    wx.login({
+      success (res) {
+        if (res.code) {
+          console.log(res.code);
+          //发起网络请求
+          wx.request({
+            url: 'https://clearday.asia:8002/carpool-user/login',
+            method:'post',
+            header: {
+              'content-type': 'application/x-www-form-urlencoded' //修改此处即可
+            },
+            data: {
+              code: res.code
+            }
+          })
+        } else {
+          console.log('登录失败！' + res.errMsg)
+        }
+      }
+    })
   },
   //申请页面的跳转
   applyOrder() {

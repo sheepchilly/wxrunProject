@@ -77,7 +77,8 @@ Page({
    */
   onLoad(options) {
     //获取openid
-    const openid = wx.getStorageSync('openid')
+    const openid = wx.getStorageSync('openid');
+    
     if(!openid){
       wx.cloud.callFunction({
         //name是云函数的名字
