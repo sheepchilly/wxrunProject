@@ -50,7 +50,7 @@ Page({
       }
     }
     wx.setStorageSync('address', address)
-    wx.navigateTo({
+    wx.redirectTo({
       url: '../address/address',
     })
   },

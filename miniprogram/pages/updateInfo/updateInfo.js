@@ -1,4 +1,3 @@
-
 // pages/updateInfo/updateInfo.js
 Page({
 

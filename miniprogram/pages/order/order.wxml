@@ -47,6 +47,22 @@
                 接单
             </view>
         </view>
+        <!-- 评论区 -->
+        <view class="comment">
+          <input type="text" value="{{commit}}" placeholder="请输入评论" bindconfirm="getComment" data-id="{{item._id}}"/>
+        </view>
+        <text class="seeComment" data-tab="0" bindtap="showComment" wx:if="{{!item.showComment}}" data-index="{{index}}">查看评论</text>
+        <text class="seeComment" bindtap="showComment" wx:else data-tab="0" data-index="{{index}}">隐藏评论</text>
+
+        <view class="commentList"  wx:if="{{item.showComment}}">
+          <view class="commentItem" wx:for="{{item.commentList}}" wx:key="index">
+            <image src="{{item.avatarUrl}}"/>
+            <view class="name">
+                <text>{{item.nickName}}</text>
+                <text>{{item.comment}}</text>
+            </view>
+          </view>
+        </view>
     </view>
 </view>
 
@@ -91,6 +107,22 @@
             <view class="accept" wx:if="{{ item.state === '已帮助' }}" bindtap="toFinish" data-item="{{ item }}">
                 已完成
             </view>
+        </view>
+        <!-- 评论区 -->
+        <view class="comment">
+          <input type="text" value="{{commit}}" placeholder="请输入评论" bindconfirm="getComment" data-id="{{item._id}}"/>
+        </view>
+        <text class="seeComment" bindtap="showComment" data-tab="1" data-index="{{index}}" wx:if="{{!item.showComment}}">查看评论</text>
+        <text class="seeComment" bindtap="showComment" wx:else  data-tab="1" data-index="{{index}}">隐藏评论</text>
+
+        <view class="commentList"  wx:if="{{item.showComment}}">
+          <view class="commentItem" wx:for="{{item.commentList}}" wx:key="index">
+            <image src="{{item.avatarUrl}}"/>
+            <view class="name">
+                <text>{{item.nickName}}</text>
+                <text>{{item.comment}}</text>
+            </view>
+          </view>
         </view>
     </view>
 </view>
@@ -184,6 +216,22 @@
             <view class="accept" wx:if="{{ item.state === '待帮助' }}" bindtap="orderReceive" data-item="{{ item }}">
                 接单
             </view>
+        </view>
+        <!-- 评论区 -->
+        <view class="comment">
+          <input type="text" value="{{commit}}" placeholder="请输入评论" bindconfirm="getComment" data-id="{{item._id}}"/>
+        </view>
+        <text class="seeComment" bindtap="showComment" data-tab="3" data-index="{{index}}" wx:if="{{!item.showComment}}">查看评论</text>
+        <text class="seeComment" bindtap="showComment" wx:else data-tab="3" data-index="{{index}}">隐藏评论</text>
+
+        <view class="commentList"  wx:if="{{item.showComment}}">
+          <view class="commentItem" wx:for="{{item.commentList}}" wx:key="index">
+            <image src="{{item.avatarUrl}}"/>
+            <view class="name">
+                <text>{{item.nickName}}</text>
+                <text>{{item.comment}}</text>
+            </view>
+          </view>
         </view>
     </view>
 </view>

@@ -19,7 +19,7 @@
           <image class="iconSize" src="../../images/edit.png"/>
           <text class="ml">编辑</text>
         </view>
-        <view class="delete" bindtap="delete" data-index="index">
+        <view class="delete" bindtap="delete" data-index="{{index}}">
           <image class="iconSize" src="../../images/delete.png"/>
           <text class="ml">删除</text>
         </view>

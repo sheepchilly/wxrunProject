@@ -1,5 +1,4 @@
-// pages/order/order.js
-const db = wx.cloud.database();
+import {getTimeNow} from '../../utils/index'
 Page({
 
   /**
@@ -15,12 +14,84 @@ Page({
     openid: '',
     canReceive:false,//是否允许接单
     helpTotalNum:0,
-    helpTotalMoney:0
+    helpTotalMoeny:0,
+    comment:'',
+    showComment:false,
   },
+  showComment(e){
+    const {index,tab} = e.currentTarget.dataset
+    if(tab ==='0'){
+      const data = this.data.orderList;
+      data[index].showComment = !data[index].showComment
+      this.setData({
+        orderList:data
+      })
+    }else if(tab === '1'){
+      const data = this.data.myOrder;
+      data[index].showComment = !data[index].showComment;
+      this.setData({
+        myOrder:data
+      })
+    }else if(tab === '3'){
+      const data = this.data.rewardOrder;
+      data[index].showComment = !data[index].showComment;
+      this.setData({
+        rewardOrder:data
+      })
+    }
+    
+  },
+  //评论区输入框
+  getComment(e){
+    const comment = e.detail.value;
+    const _id = e.currentTarget.dataset.id
+    const {avatarUrl,nickName} = wx.getStorageSync('userInfo')
+    wx.request({
+      url: 'http://localhost:3000/addComment',
+      method:'post',
+      data:{
+        _id,
+        comment,
+        nickName,
+        avatarUrl,
+        time:getTimeNow()
+      },
+      success:res=>{
+        if(res.data==='success'){
+          wx.showToast({
+            title: '评论成功'
+          })
+          this.setData({
+            comment:''
+          })
+          //判断当前是在哪个tab下，再去做相应的请求
+          const tabNow = this.data.tabNow;
+
+          if (tabNow === 0) {
+            this.onLoad();
+          } else if (tabNow === 1) {
+            this.getMyOrder();
+          } else if (tabNow === 2) {
+            this.getMyHelpOrder();
+            this.getHelpTotalNum();
+            this.getHelpTotalMoney();
+          } else if (tabNow === 3) {
+            this.getRewardOrder();
+          }
+        }else{
+          wx.showToast({
+            title: '评论失败',
+            icon:'none'
+          })
+        }
+      }
+    })
+    
+    
+  },
+  //头部导航栏
   selectTab(e) {
-    const {
-      id
-    } = e.currentTarget.dataset;
+    const {id} = e.currentTarget.dataset;
     this.setData({
       tabNow: id,
     })
@@ -31,64 +102,62 @@ Page({
     } else if (id === 2) {
       this.getMyHelpOrder();
       this.getHelpTotalNum();
+      this.getHelpTotalMoney();
     } else if (id === 3) {
       this.getRewardOrder();
     }
   },
     // 我帮助的订单金额总和
     getHelpTotalMoney() {
-      //用一个变量保存一下
-      const $ = db.command.aggregate;
-      db.collection('order').aggregate().match({
-        receivePerson: wx.getStorageSync('openid'),
-        state: '已完成',
-        //分组
-      }).group({
-        //_id只是占位
-        _id: null,
-        totalNum: $.sum('$money'),
-      }).end({
+      wx.request({
+        url:"http://127.0.0.1:3000/getHelpTotalMoney",
+        data:{
+          receivePerson: wx.getStorageSync('openid'),
+          state: '已完成',
+        },
         success: (res) => {
-          console.log(res);
           this.setData({
-            helpTotalMoeny: res.list[0].totalNum
+            helpTotalMoeny: res.data[0].totalNum
           })
         }
       })
     },
+
   // 我帮助的订单单数总和
   getHelpTotalNum() {
-    db.collection('order').where({
-      receivePerson: wx.getStorageSync('openid'),
-      state: '已完成'
-      //.count==>查询总数
-    }).count({
+    wx.request({
+      url: 'http://localhost:3000/getHelpTotalNum',
+      data:{
+        receivePerson: wx.getStorageSync('openid'),
+        state: '已完成'
+      },
       success: (res) => {
-        console.log(res);
+        // console.log(res,'totalNum');
         this.setData({
-          helpTotalNum: res.total
+          helpTotalNum: res.data.count
         })
       }
     })
   },
   // 获取我帮助的订单信息 
   getMyHelpOrder() {
+    
     wx.showLoading({
       title: '加载中',
     })
-    db.collection('orderReceive').where({
-      _openid: wx.getStorageSync('openid')
-    }).get({
-      success: (res) => {
-        const {
-          data
-        } = res;
-        this.setData({
-          helpTotalMoeny: data[0].allMoney,
-          helpTotalNum: data[0].allCount
+    wx.request({
+      url: 'http://localhost:3000/getMyHelpOrder',
+      data:{
+        receivePerson:wx.getStorageSync('openid'),
+      },success: (res) => {
+        // console.log(res);
+        const {data} = res;
+        data.forEach(item=>{
+          item.info = this.formatState(item);
+          item.stateColor = this.formatState(item.state);
         })
         this.setData({
-          helpOrder: data[0].allOrder,
+          helpOrder: data,
         })
         wx.hideLoading();
       }
@@ -101,23 +170,16 @@ Page({
     wx.showLoading({
       title: '加载中',
     })
-    db.collection('order').where({
-      state: '待帮助'
-    }).get({
+    wx.request({
+      url: 'http://localhost:3000/getRewardOrder',
       success: (res) => {
-        const {
-          data
-        } = res;
+        const {data} = res;
         data.forEach(item => {
-          if (item.name === "快递代取" && item.info.expressCode) {
-            item.expressCode = item.info.expressCode;
-          }
-          if (item.name === "快递代取" && item.info.codeImg) {
-            item.codeImg = item.info.codeImg;
-          }
           item.info = this.formatInfo(item);
           item.stateColor = this.formatState(item.state);
+          item.showComment = false;
         });
+        console.log(data)
         this.setData({
           rewardOrder: data,
         })
@@ -131,22 +193,17 @@ Page({
     wx.showLoading({
       title: '加载中',
     })
-    db.collection('order').orderBy('createTime', 'desc').where({
-      _openid: this.data.openid
-    }).get({
-      success: (res) => {
-        const {
-          data
-        } = res;
+    wx.request({
+      url: 'http://localhost:3000/getMyOrder',
+      data:{
+        openid:this.data.openid
+      },
+        success: (res) => {
+        const {data} = res;
         data.forEach(item => {
-          if (item.name === "快递代取" && item.info.expressCode) {
-            item.expressCode = item.info.expressCode;
-          }
-          if (item.name === "快递代取" && item.info.codeImg) {
-            item.codeImg = item.info.codeImg;
-          }
-          item.info = this.formatInfo(item);
-          item.stateColor = this.formatState(item.state);
+          item.info = this.formatInfo(item); //订单信息
+          item.stateColor = this.formatState(item.state); //设置右上角颜色
+          item.showComment = false
         });
         this.setData({
           myOrder: data,
@@ -163,25 +220,34 @@ Page({
     wx.showLoading({
       title: '加载中',
     })
-    const {
-      item
-    } = e.currentTarget.dataset;
-    const {
-      _id
-    } = item;
-    db.collection('order').doc(_id).update({
-      data:{_openid:wx.getStorageSync('openid'),
-      state:'已帮助'
-    },
-    success:res=>{
-      if(this.data.tabNow===0){
-        this.onLoad()
-      }else{
-        this.getRewardOrder();
+    const {item} = e.currentTarget.dataset;
+    const {_id} = item; //这个_id是当前点击的订单的_id
+    // console.log(_id,'_id');
+    wx.request({
+      url:'http://localhost:3000/toGetOrder',
+      method:'get',
+      data:{
+        receivePerson:wx.getStorageSync('openid'),
+        _id
+      },
+      success:res=>{
+        // console.log(res,'orderReceive')
+        if(res.data==='success'){
+        if(this.data.tabNow===0){
+          this.onLoad()
+        }else{
+          this.getRewardOrder();
+          }
+        wx.hideLoading();
+
+        }else{
+          wx.showToast({
+            title: '接单失败',
+            icon:'none'
+          })
+        }
       }
-      wx.hideLoading();
-    }
-  })
+    })
  } else { //false的话就提示不是接单员
     wx.showModal({
       title: '提示',
@@ -191,29 +257,31 @@ Page({
   }
 
 },
-
+//接单按钮
   toFinish(e) {
     wx.showLoading({
       title: '加载中',
     })
     //解构item
-    const {
-      item
-    } = e.currentTarget.dataset;
+    const {item} = e.currentTarget.dataset;
     //在item里面解构_id
-    const {
-      _id
-    } = item;
-    db.collection('order').doc(_id).update({
-      //把现有的state改成已完成
-      data: {
-        state: '已完成'
-      },
+    const {_id} = item;
+    wx.request({
+      url:"http://localhost:3000/toFinshOrder",
+      data:{_id},
       success: (res) => {
-        this.getMyOrder();
-        wx.hideLoading();
+        // console.log(res,'tofinish')
+        if(res.data === 'success'){
+          this.getMyOrder();
+        }else{
+          wx.showToast({
+            title: '操作失败',
+            icon:'none'
+          })
+        }
       }
     })
+    wx.hideLoading();
   },
 
   formatInfo(orderInfo) {
@@ -295,18 +363,18 @@ Page({
     }
   },
   getPersonPower(){
-  db.collection('orderReceive').where({
-    //查询条件是openid和state
-    _openid:wx.getStorageSync('openid'),
-    state:'通过'
-  }).get({
-    success:res=>{
-      this.setData({
-        //取反两次判断用户当前允不允许接单，没有查到数据的话就是0，0取反两次就是false，1就是true
-        canReceive:!!res.data.length
-      })
-    }
-  })
+    wx.request({
+      url: 'http://localhost:3000/getPersonPower',
+      data:{
+        openid:wx.getStorageSync('openid')
+      },
+      success:res=>{
+        this.setData({
+//取反两次判断用户当前允不允许接单，没有查到数据的话就是0，0取反两次就是false，1就是true
+          canReceive:!!res.data.length
+        })
+      }
+    })
 },
 
   /**
@@ -318,15 +386,18 @@ Page({
     })
     //获取当前用户的权限--判断是管理员还是普通用户
     this.getPersonPower();
-    db.collection('order').get({
+
+    wx.request({
+      url: 'http://localhost:3000/getAllOrder',
       success: (res) => {
-        const {
-          data
-        } = res;
+        // console.log(res.data,'onload')
+        const {data} = res;
         data.forEach(item => {
           item.info = this.formatInfo(item);
           item.stateColor = this.formatState(item.state);
+          item.showComment = false
         });
+        // console.log(data,'onload')
         this.setData({
           orderList: data,
           openid: wx.getStorageSync('openid')
@@ -382,129 +453,8 @@ Page({
    * 页面上拉触底事件的处理函数
    */
   onReachBottom: function () {
-    wx.showLoading({
-      title: '加载中',
-    })
-    let {
-      orderList,
-      myOrder,
-      rewardOrder,
-      helpOrder,
-      tabNow,
-      openid
-    } = this.data;
 
-    //分页功能，skip是查询的起点
-    if (tabNow === 0) {
-      db.collection('order').skip(orderList.length).get({
-        success: (res) => {
-          if (res.data.length) {
-            res.data.forEach(item => {
-              item.info = this.formatInfo(item);
-              item.stateColor = this.formatState(item.state);
-              orderList.push(item);
-            })
-            this.setData({
-              orderList,
-            })
-          } else {
-            wx.showToast({
-              icon: 'none',
-              title: '无更多信息',
-            })
-          }
-          wx.hideLoading();
-        },
-        fail: (error) => {
-          wx.showToast({
-            icon: 'none',
-            title: '服务器出错...',
-          })
-          wx.hideLoading();
-        }
-      })
-      //我的订单页面是条件查询
-    } else if (tabNow === 1) {
-      db.collection('order').skip(myOrder.length).where({
-        _openid: openid
-      }).get({
-        success: (res) => {
-          if (res.data.length) {
-            const {
-              data
-            } = res;
-            data.forEach(item => {
-              item.info = this.formatInfo(item);
-              item.stateColor = this.formatState(item.state);
-              //数据要push进去
-              myOrder.push(item);
-            });
-            this.setData({
-              myOrder,
-            })
-          } else {
-            wx.showToast({
-              icon: 'none',
-              title: '无更多信息',
-            })
-          }
-          wx.hideLoading();
-        }
-      })
-    } else if (tabNow === 2) {
-      db.collection('order').skip(helpOrder.length).where({
-        receivePerson: this.data.openid,
-        state:'已完成'
-      }).get({
-        success: (res) => {
-          if (res.data.length) {
-            const {
-              data
-            } = res;
-            data.forEach(item => {
-              item.info = this.formatInfo(item);
-              item.stateColor = this.formatState(item.state);
-              helpOrder.push(item);
-            });
-            this.setData({
-              helpOrder,
-            })
-          } else {
-            wx.showToast({
-              icon: 'none',
-              title: '无更多信息',
-            })
-          }
-          wx.hideLoading();
-        }
-      })
-    } else if (tabNow === 3) {
-      db.collection('order').skip(rewardOrder.length).where({
-        state: '待帮助'
-      }).get({
-        success: (res) => {
-          if (res.data.length) {
-            const {
-              data
-            } = res;
-            data.forEach(item => {
-              item.info = this.formatInfo(item);
-              item.stateColor = this.formatState(item.state);
-              rewardOrder.push(item);
-            });
-            this.setData({
-              rewardOrder,
-            })
-          } else {
-            wx.showToast({
-              icon: 'none',
-              title: '无更多信息',
-            })
-          }
-          wx.hideLoading();
-        }
-      })
-    }
+    
   },
 
   /**

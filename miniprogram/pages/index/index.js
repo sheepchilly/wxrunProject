@@ -10,52 +10,61 @@ Page({
       {
         icon:'../../images/kuaidi.png',
         text:'快递代取',
-        // 在这里写上url就可以直接把url传过去
+        inner:'代取快递,免排队',
         url:'../getExpress/getExpress'
       },
       {
         icon:'../../images/dayin.png',
         text:'打印服务',
+        inner:'代帮打印,免等待',
         url:'../print/print'
       },
       {
         icon:'../../images/paotui.png',
         text:'校园跑腿',
+        inner:'代办业务,免跑腿',
         url:'../run/run'
       },
       {
-        icon:'../../images/kuaididaiji.png',
+        icon:'../../images/daiji.png',
         text:'快递代寄',
+        inner:'代寄快递,免走动',
         url:'../expressReplace/expressReplace'
       },
       {
         icon:'../../images/zujie.png',
         text:'租借服务',
+        inner:'"你需要的我都有"',
         url:'../lease/lease'
       },
       {
-        icon:'../../images/youxi.png',
+        icon:'../../images/peiwan.png',
         text:'游戏陪玩',
+        inner:'上分不再难',
         url:'../playGame/playGame'
       },
       {
         icon:'../../images/bangsong.png',
         text:'帮我送',
+        inner:'代办业务,免跑腿',
         url:'../helpMeGive/helpMeGive'
       },
       {
-        icon:'../../images/daiti.png',
+        icon:'../../images/tidai.png',
+        inner:'一站式解决',
         text:'代替服务',
         url:'../replaceMe/replaceMe'
       },
       {
         icon:'../../images/qita.png',
+        inner:'别的需求看这里',
         text:'其他帮助',
         url:'../otherHelp/otherHelp'
       }
-    ]
+    ],
+    userInfo:{},
   },
-  //切换页面
+  //切换页面（鉴权）
   toDetail(e){
     const url = e.currentTarget.dataset.url;
     //1.取缓存
@@ -78,15 +87,30 @@ Page({
   onLoad(options) {
     //获取openid
     const openid = wx.getStorageSync('openid');
-    
     if(!openid){
-      wx.cloud.callFunction({
-        //name是云函数的名字
-        name:'getMyOpenID',
-        success:res=>{
-          const {openid} = res.result
-          wx.setStorageSync('openid',openid)
-        }
+      wx.login({
+        success: (res) => {
+          if(res.code){
+            wx.request({
+              url: 'http://127.0.0.1:3000/login',
+              data:{
+                code:res.code
+              },
+              success:res=>{
+                const {openid} = res.data;
+                wx.setStorageSync('openid', openid)
+                this.data.userInfo={
+                  openid,
+                  session_key:res.data.session_key,
+                  nickName:`用户${openid.slice(-8)}`,
+                  avatarUrl:'../../images/person.png'
+                }
+                wx.setStorageSync('userInfo', this.data.userInfo)
+                
+              }
+            })
+          }
+        },
       })
     }
   },

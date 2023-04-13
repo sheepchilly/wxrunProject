@@ -1,5 +1,4 @@
 // pages/orderReceiver/orderReceiver.js
-const db = wx.cloud.database();
 Page({
 
   /**
@@ -14,19 +13,27 @@ Page({
     wx.showLoading({
       title: '加载中',
     })
-    //把点击的数据都给传过来，然后解构出来-name：代表它点击哪一个按钮
-    const { item: { _id }, name } = e.currentTarget.dataset;
-    db.collection('orderReceive').doc(_id).update({
-      data: {
-        state: name,
-        //审核的管理员是谁
-        examinePerson: wx.getStorageSync('openid') 
+    const {item:{_id},name} = e.currentTarget.dataset;
+    // console.log(e.currentTarget.dataset)
+    wx.request({
+      url: 'http://localhost:3000/updateOrderReceive',
+      method:'POST',
+      data:{
+        _id,
+        state:name,
+        examinPerson:wx.getStorageSync('openid')
       },
-      success: (res) => {
-        //成功的话刷新页面
-        this.onLoad();
-        //隐藏loading
-        wx.hideLoading();
+      success:res=>{
+        const {data} = res;
+        if(data==='success'){
+          this.onLoad();
+          wx.hideLoading()
+        }else{
+          wx.showToast({
+            title: '操作失败！',
+            icon:'none'
+          })
+        }
       }
     })
   },
@@ -35,12 +42,11 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    db.collection('orderReceive').where({
-      state: '待审核'
-    }).get({
-      success: (res) => {
+    wx.request({
+      url: 'http://localhost:3000/getOrderReceive',
+      success:res=>{
         this.setData({
-          receiveList: res.data
+          receiveList:res.data
         })
       }
     })

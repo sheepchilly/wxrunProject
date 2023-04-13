@@ -4,8 +4,8 @@
   <!-- block不会渲染到DOM树上  -->
   <block wx:if="{{!hasUserInfo}}" wx:key="idnex">
   <!-- 让一个按钮触发两次事件 -->
-    <button wx:if="{{canIUseGetUserProfile}}" bindtap="getUserProfile">点我授权</button>
-    <button wx:else open-type="getUserInfo" bindgetuserinfo="getUserInfo">点我授权</button>
+    <button bindtap="login">立即登录</button>
+    <!-- <button  wx:if="{{canIUseGetUserProfile}}" wx:else open-type="getUserInfo" bindgetuserinfo="getUserInfo">点我授权</button> -->
   </block>
   <!-- 有授权显示用户信息 -->
   <view class="name" wx:if="{{hasUserInfo}}">
@@ -23,7 +23,8 @@
   </view>
   <text class="cellRight">></text>
 </button>
-<button class="cell mt" bindtap="applyReceiver" wx:if="{{admin}}">
+<!-- wx:if="{{admin}}" => 用来判断当前用户是否具备审核接单申请，暂时不放进去 -->
+<button class="cell mt" bindtap="applyReceiver" >
   <view class="cellLeft">
     <image src="../../images/check.png" mode=""/>
     <text>审核接单申请</text>
@@ -73,8 +74,4 @@
 <!-- 版本 -->
 <view class="version mt">
   当前版本：1.0.0
-</view>
-
-<view class="mt">
-  <button type="primary" bindtap="testUser">test</button>
 </view>

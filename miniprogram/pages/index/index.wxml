@@ -21,6 +21,11 @@
       <image src="{{item.icon}}" />
     </view>
     </view>
-    <text class="text">{{item.text}}</text>
+    <text class="text">
+    {{item.text}}
+    </text>
+    <text class="inner">
+    {{item.inner}}
+    </text>
   </view>
 </view>

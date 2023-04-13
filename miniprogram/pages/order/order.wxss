@@ -152,3 +152,40 @@
 .helpOrderInfo .orderNum text:last-child, .orderMoney text:last-child {
   color: #a1a1a1;
 }
+
+/* 评论区 */
+.comment input{
+  background-color: #f3f3f3;
+  font-size: 24rpx;
+  padding: 10rpx 20rpx;
+  margin-top: 25rpx;
+  margin-bottom: 20rpx;
+}
+.order .seeComment{
+  color: #1067D1;
+  margin-left: 15rpx;
+}
+.commentList{
+  display: flex;
+  flex-direction: column;
+  padding: 20rpx 10rpx;
+}
+.commentList .commentItem{
+  display: flex;
+  align-items: center;
+  margin-top: 25rpx;
+}
+.commentList .commentItem image{
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+}
+.commentList .commentItem .name{
+  display: flex;
+  flex-direction: column;
+  margin-left: 20rpx;
+}
+.commentList .commentItem .name text:last-child{
+  margin-left: 15rpx;
+  margin-top: 15rpx;
+}

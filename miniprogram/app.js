@@ -1,4 +1,5 @@
 // app.js
+const http = require('./api/index.js')
 App({
   onLaunch: function () {
     if (!wx.cloud) {

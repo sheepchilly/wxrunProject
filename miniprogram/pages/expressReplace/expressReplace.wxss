@@ -1,4 +1,3 @@
-
 page {
   background-color: #fff;
 }
@@ -24,11 +23,20 @@ page {
   width: 90%;
 }
 
-.help_content .detail image {
+.help_content .detail .getImg {
   width: 60rpx;
   height: 60rpx;
   position: absolute;
   right: 60rpx;
+  bottom: 40rpx;
+  z-index: 10;
+}
+
+.help_content .detail .imgUrl {
+  width: 80rpx;
+  height: 100rpx;
+  position: absolute;
+  left: 60rpx;
   bottom: 40rpx;
 }
 

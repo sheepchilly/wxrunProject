@@ -1,6 +1,4 @@
-// 使用云数据库
 import { getTimeNow } from '../../utils/index';
-const db = wx.cloud.database()
 Page({
 
   /**
@@ -8,7 +6,7 @@ Page({
    */
   data: {
     userInfo:{},
-    userIDImg:'',
+    userIDImg:'', //相关证件地址
     content:'1.证件号指学生证上的号码2.相关证件正面指的是学生证正面3.需要加急请点击微信客服添加好友申请加急！',
     showTip:false,
     name:'',
@@ -16,39 +14,59 @@ Page({
   },
   //提交申请的回调
   submit() {
-    // 保存this指向，方便复用
-    const that = this.data;
-    // 提交信息
-    db.collection('orderReceive').add({
+    const {
+        name,
+        userID,
+        userIDImg
+    } = this.data;
+    if (!name || !userID || !userIDImg) {
+        wx.showToast({
+            icon: 'none',
+            title: '您输入的信息不全',
+        })
+        return;
+    }
+    wx.request({
+        url: 'http://localhost:3000/addNewReceiver',
+        method: 'POST',
         data: {
-            name: that.name,
-            userID: that.userID,
-            userIDImg: that.userIDImg,
-            userInfo: that.userInfo,
+            openid: wx.getStorageSync('openid'),
+            name,
+            userID,
+            userIDImg,
+            userInfo: wx.getStorageSync('userInfo'),
             state: '待审核',
             time: getTimeNow(),
-            allMoney: 0,
-            allCount: 0,
-            allOrder: []
         },
         success: (res) => {
-            // 清空输入内容
-            this.setData({
-                name: '',
-                userID: '',
-                userIDImg: '',
-            })
-            wx.showToast({
-              title: '提交成功',
-            })
-            wx.navigateTo({
-              url: '../receiveLoading/receiveLoading',
-            })
+            const {
+                data
+            } = res;
+            if (data === "success") {
+                // 清空输入内容
+                this.setData({
+                    name: '',
+                    userID: '',
+                    userIDImg: '',
+                })
+                wx.showToast({
+                    title: '提交成功',
+                })
+                wx.navigateTo({
+                    url: '../receiveLoading/receiveLoading',
+                })
+            } else {
+                wx.showToast({
+                    icon: 'none',
+                    title: '上传失败',
+                })
+            }
+
         },
         fail: (res) => {
             wx.showToast({
-              icon: 'none',
-              title: '上传失败',
+                icon: 'none',
+                title: '上传失败',
             })
         }
     })
@@ -96,8 +114,7 @@ Page({
   },
   //相关证件上传的回调
   uploadImg(){
-    let userInfo = this.data.userInfo
-    wx.chooseMedia({
+    wx.chooseImage({
       count: 1,
       mediaType: ['image'],
       sizeType:['original','compresses'],
@@ -106,18 +123,19 @@ Page({
         wx.showLoading({
           title: '加载中',
         })
-        //生成随机数->random函数会从0-1随机生成一个小数，然后*1000就会得到一个大一点的，然后用floor取整
         const random = Math.floor(Math.random()*1000);
-        //上传云存储的API
-        wx.cloud.uploadFile({
-          cloudPath:`userIDImg/${this.data.userInfo.nickName}-${random}.png`,
-          filePath:res.tempFiles[0].tempFilePath,
-          success:res=>{
-            let fileID = res.fileID;
+        const tempFilePaths = res.tempFilePaths
+        wx.uploadFile({
+          url: 'http://localhost:3000/uploadImg', 
+          filePath: tempFilePaths[0], //图片路径放在数组第0项下面
+          name: 'file',
+          success:(res)=>{
+            let {path} =JSON.parse(res.data)[0];
+            path = path.replace(/\\/g,'/'); //把\换成/，后端传来的地址有问题
             this.setData({
-              userIDImg:fileID
+              userIDImg:`http://localhost:3000/${path}`
             })
-            wx.hideLoading({})
+            wx.hideLoading();
           }
         })
       }
